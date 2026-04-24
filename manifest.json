@@ -1,0 +1,9 @@
+{
+  "name": "Mirrman",
+  "description": "An extension help you mirror a Github/Gitlab repo to your own Gitea instence",
+  "version": "1.0",
+  "manifest_version": 3,
+  "action": {
+    "default_popup": "popup/popup.html"
+  }
+}
