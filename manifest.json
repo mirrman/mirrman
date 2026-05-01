@@ -1,12 +1,13 @@
 {
   "name": "Mirrman",
-  "description": "An extension help you mirror a Github/Gitlab repo to your own Gitea instence",
+  "description": "An extension help you mirror a Github repo to your own Gitea instence",
   "version": "1.0",
   "manifest_version": 3,
   "permissions": ["storage"],
   "host_permissions": ["<all_urls>"],
   "action": {
-    "default_popup": "popup/popup.html"
+    "default_popup": "popup/popup.html",
+    "default_icon": "icon/icon64.png"
   },
   "options_ui": {
     "page": "settings/settings.html",
