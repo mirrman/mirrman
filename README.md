@@ -1,98 +1,134 @@
 # Mirrman
 
-**Mirrman** is a browser extension that helps you mirror GitHub repositories to your own Gitea instance with just a few clicks. Perfect for developers who want to maintain backups or mirror public/private repositories to their self-hosted Gitea server.
+**[English](README_en.md)** | 简体中文
 
-## Features
+**Mirrman** 是一款浏览器扩展，帮助你用极少的步骤将 GitHub 仓库镜像到你自己的 Gitea 实例中。非常适合希望备份仓库，或将公共 / 私有仓库同步到自托管 Gitea 服务的开发者。
 
-- **Easy Repository Mirroring** - Mirror any GitHub, GitLab, or Git repository to your Gitea instance
-- **Flexible Configuration** - Customize what to include in your mirrors:
-  - Wiki pages
+## 功能特点
+
+- **一键镜像仓库**
+  支持将 GitHub 或任意 Git 仓库镜像到你的 Gitea 实例
+
+- **灵活的配置选项**
+  可自定义需要同步的内容：
+  - Wiki 页面
   - Issues
   - Pull Requests
   - Releases
   - Milestones
   - Labels
-  - LFS (Large File Storage) support
-- **Multiple Description Strategies** - Choose how to handle repository descriptions:
-  - Prefix with mirror information
-  - Use original description
-  - Leave empty
-- **Private Repository Support** - Create private mirrors when needed
-- **Token-based Authentication** - Securely authenticate with both source and target repositories
-- **Intuitive UI** - Clean popup interface with settings page for configuration
-- **Persistent Settings** - Your preferences are saved locally in the browser
+  - 支持 LFS（大文件存储）
 
-## Installation
+- **多种仓库描述策略**
+  可选择如何处理仓库描述：
+  - 添加镜像来源前缀
+  - 使用原始描述
+  - 留空
 
-1. Download the latest release from the [GitHub Releases](https://github.com/mirrman/mirrman/releases)
-2. Unzip the downloaded file
-3. Open your browser's extension management page:
-   - **Chrome/Edge**: Go to `chrome://extensions/` or `edge://extensions/`
-   - Enable **Developer mode** (toggle in the top right)
-   - Click **Load unpacked**
-   - Select the extracted `mirrman` directory
-4. The Mirrman icon should now appear in your browser toolbar
+- **支持私有仓库**
+  可将镜像仓库设置为私有
 
-## Usage
+- **基于 Token 的认证机制**
+  安全地连接源仓库和目标仓库
 
-### Initial Setup
+- **简洁直观的界面**
+  提供清爽的弹出窗口和设置页面
 
-1. Click the Mirrman icon in your browser toolbar
-2. Click the **⚙ 设置** (Settings) button to open the settings page
-3. Configure your Gitea instance:
-   - Enter your **Gitea 实例地址** (Gitea instance URL), e.g., `https://gitea.example.com`
-   - Enter your **Gitea Personal Access Token** (Generate one in Gitea: Settings → Applications → Generate New Token)
-   - (Optional) Enter a **源仓库访问令牌** (Source repository access token) for private source repositories
-4. Set your default preferences:
-   - Description strategy
-   - Default private setting
-   - Default items to include (Wiki, Issues, Pull Requests, etc.)
-   - LFS default
-5. Click **保存** (Save) to save your settings
+- **配置持久化**
+  所有偏好设置会保存在浏览器本地
 
-### Mirroring a Repository
+## 安装方法
 
-1. Click the Mirrman icon in your browser toolbar
-2. Enter the source repository URL, e.g., `https://github.com/owner/repo`
-3. (Optional) Click **下拉展开 偏好设置** (Expand Preferences) to customize:
-   - Repository description strategy
-   - Private repository toggle
-   - Items to mirror (Wiki, Issues, LFS, etc.)
-   - LFS endpoint (if using LFS)
-4. Click **开始镜像** (Start Mirroring)
-5. Wait for the process to complete - you'll see an alert with the result
+1. 从 [GitHub Releases](https://github.com/mirrman/mirrman/releases) 下载最新版本
+2. 解压下载的文件
+3. 打开浏览器扩展管理页面：
+   - **Chrome / Edge**：访问 `chrome://extensions/` 或 `edge://extensions/`
+   - 开启右上角的**开发者模式**
+   - 点击 **加载已解压的扩展程序**
+   - 选择解压后的 `mirrman` 文件夹
 
-## Configuration Options
+4. 安装完成后，浏览器工具栏会出现 Mirrman 图标
 
-### Settings Page
+## 使用方法
 
-- **Gitea 实例地址** - Your self-hosted Gitea server URL
-- **Gitea Personal Access Token** - Token for API authentication
-- **源仓库访问令牌** - Token for accessing private source repositories (optional)
-- **默认仓库描述策略** - How to handle descriptions for mirrored repos:
-  - Prefix: `[本仓库镜像自 {url}] — {original description}`
-  - Original: Keep the original description
-  - Empty: Leave description blank
-- **默认私有** - Whether new mirrors are private by default
-- **默认包含项** - Default items to include when mirroring:
-  - Wiki, Issues, Pull Requests, Releases, Milestones, Labels
-- **LFS 默认** - Enable LFS support by default
-- **测试 Gitea Token** - Verify your token is valid
+### 初始设置
 
-### Popup Options
+1. 点击浏览器工具栏中的 Mirrman 图标
+2. 点击 **⚙ 设置** 按钮进入设置页面
+3. 配置你的 Gitea 实例：
+   - 输入 **Gitea 实例地址**（例如：`https://gitea.example.com`）
+   - 输入 **Gitea 个人访问令牌**（在 Gitea 中生成：Settings → Applications → Generate New Token）
+   - （可选）填写 **源仓库访问令牌**（用于访问私有源仓库）
 
-When mirroring a repository, you can override your default settings:
-- **Repository Description Strategy** - Choose a different description strategy
-- **Private** - Toggle between public/private
-- **Wiki** - Include Wiki pages
-- **Issues** - Include issues
-- **LFS** - Enable LFS support
-- **LFS endpoint** - Specify custom LFS endpoint
+4. 设置默认选项：
+   > **Issues、Pull Requests、Releases、Milestones、Labels 需提供源仓库访问token后才可同步**
+   - 仓库描述策略
+   - 是否默认设为私有
+   - 默认同步内容（Wiki、Issues、PR 等）
+   - 是否默认启用 LFS
+5. 点击 **保存**
 
-## Contributing
+### 镜像仓库
 
-Contributions are welcome! Please feel free to submit issues or pull requests.
+1. 点击浏览器工具栏中的 Mirrman 图标
+2. 输入源仓库地址，例如：
+   `https://github.com/owner/repo`
+3. （可选）点击 **展开偏好设置**，进行自定义：
+   - 仓库描述策略
+   - 是否私有
+   - 需要同步的内容（Wiki、Issues、LFS 等）
+   - LFS Endpoint（如使用 LFS）
 
-## License
+4. 点击 **开始镜像**
+5. 等待执行完成，结果会以提示信息显示
 
-This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.
+## 配置说明
+
+### 设置页面
+
+- **Gitea 实例地址**
+  你的自托管 Gitea 服务地址
+
+- **Gitea Personal Access Token**
+  用于 API 认证的访问令牌
+
+- **源仓库访问令牌**
+  用于访问私有源仓库（可选）
+
+- **默认仓库描述策略**
+  - 前缀：`[本仓库镜像自 {url}] — {原描述}`
+  - 原始：保留原始描述
+  - 留空：不填写描述
+
+- **默认私有**
+  新建镜像仓库是否默认设为私有
+
+- **默认包含项**
+
+  > **Issues、Pull Requests、Releases、Milestones、Labels 需提供源仓库访问token后才可同步**
+  - Wiki、Issues、Pull Requests、Releases、Milestones、Labels
+
+- **LFS 默认**
+  是否默认启用大文件存储支持
+
+- **测试 Gitea Token**
+  验证 Token 是否有效
+
+### 弹窗选项
+
+在执行镜像时，可以覆盖默认设置：
+
+- **仓库描述策略**
+- **是否私有**
+- **Wiki**
+- **Issues**
+- **LFS**
+- **LFS Endpoint**
+
+## 参与贡献
+
+欢迎提交 Issue 或 Pull Request，一起完善项目！
+
+## 许可证
+
+本项目基于 GNU General Public License v3.0 开源，详见 [LICENSE](LICENSE) 文件。
