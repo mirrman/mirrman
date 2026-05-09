@@ -1,7 +1,7 @@
 {
   "name": "Mirrman",
   "description": "An extension help you mirror a Github repo to your own Gitea instence",
-  "version": "1.0",
+  "version": "1.1",
   "manifest_version": 3,
   "permissions": ["storage"],
   "host_permissions": ["<all_urls>"],
