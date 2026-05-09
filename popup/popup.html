@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="../styles/shared.css">
-    <link rel="stylesheet" href="popup.css">
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../styles/shared.css" />
+    <link rel="stylesheet" href="popup.css" />
     <title>Mirrman</title>
   </head>
   <body>
@@ -13,9 +13,14 @@
       <button id="openSettings" class="link-button">⚙ 设置</button>
     </div>
 
-    <div id="body" class="card" style="margin-top:10px">
+    <div id="body" class="card" style="margin-top: 10px">
       <div class="row">
-        <input id="url" type="text" placeholder="例如 https://github.com/owner/repo" aria-label="源仓库URL"/>
+        <input
+          id="url"
+          type="text"
+          placeholder="例如 https://github.com/owner/repo"
+          aria-label="源仓库URL"
+        />
         <button id="confirm" class="primary">开始镜像</button>
       </div>
 
@@ -30,11 +35,35 @@
               <option value="empty">III. 留空</option>
             </select>
           </div>
-          <div class="field compact"><label for="private">私有</label><input id="private" type="checkbox"></div>
-          <div class="field compact"><label for="issues">Issues</label><input id="issues" type="checkbox" checked></div>
-          <div class="field compact"><label for="wiki">Wiki</label><input id="wiki" type="checkbox" checked></div>
-          <div class="field compact"><label for="lfs">LFS</label><input id="lfs" type="checkbox"></div>
-          <div class="field"><label for="lfs_endpoint">LFS endpoint</label><input id="lfs_endpoint" type="text" placeholder="可选：LFS endpoint"></div>
+          <div class="field">
+            <label for="ownerSelect">Gitea 仓库 Owner</label>
+            <select id="ownerSelect">
+              <option value="">（默认使用 Token 所属用户）</option>
+            </select>
+          </div>
+          <div class="field compact">
+            <label for="private">私有</label
+            ><input id="private" type="checkbox" />
+          </div>
+          <div class="field compact">
+            <label for="issues">Issues</label
+            ><input id="issues" type="checkbox" checked />
+          </div>
+          <div class="field compact">
+            <label for="wiki">Wiki</label
+            ><input id="wiki" type="checkbox" checked />
+          </div>
+          <div class="field compact">
+            <label for="lfs">LFS</label><input id="lfs" type="checkbox" />
+          </div>
+          <div class="field">
+            <label for="lfs_endpoint">LFS endpoint</label
+            ><input
+              id="lfs_endpoint"
+              type="text"
+              placeholder="可选：LFS endpoint"
+            />
+          </div>
         </div>
       </details>
     </div>

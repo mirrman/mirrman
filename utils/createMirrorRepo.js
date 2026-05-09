@@ -2,6 +2,7 @@ export async function createMirrorRepo(
   giteaUrl,
   clone_addr,
   repo_name,
+  repo_owner,
   token,
   options = {},
 ) {
@@ -24,6 +25,7 @@ export async function createMirrorRepo(
   const body = {
     clone_addr,
     repo_name,
+    repo_owner: repo_owner || undefined,
     service,
     description,
     private: isPrivate,

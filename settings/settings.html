@@ -1,27 +1,54 @@
 <!doctype html>
 <html>
   <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width,initial-scale=1">
-    <link rel="stylesheet" href="../styles/shared.css">
-    <link rel="stylesheet" href="settings.css">
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <link rel="stylesheet" href="../styles/shared.css" />
+    <link rel="stylesheet" href="settings.css" />
     <title>Mirrman 设置</title>
   </head>
   <body>
     <div class="card">
       <h2>Mirrman 设置</h2>
       <form id="settingsForm">
-        <div class="field"><label for="giteaUrl">Gitea 实例地址</label><input id="giteaUrl" type="text" placeholder="https://gitea.example.com"></div>
+        <div class="field">
+          <label for="giteaUrl">Gitea 实例地址</label
+          ><input
+            id="giteaUrl"
+            type="text"
+            placeholder="https://gitea.example.com"
+          />
+        </div>
         <div class="field token-field">
           <label for="giteaToken">Gitea Personal Access Token</label>
           <div class="token-row">
-            <input id="giteaToken" type="password" placeholder="Token" aria-label="Gitea Token">
-            <button type="button" id="toggleToken" aria-label="切换 token 可见性" title="显示/隐藏 Token">👀</button>
+            <input
+              id="giteaToken"
+              type="password"
+              placeholder="Token"
+              aria-label="Gitea Token"
+            />
+            <button
+              type="button"
+              id="toggleToken"
+              aria-label="切换 token 可见性"
+              title="显示/隐藏 Token"
+            >
+              👀
+            </button>
           </div>
         </div>
-        <div class="field"><label for="sourceAuthToken">源仓库访问令牌（可选）</label><input id="sourceAuthToken" type="password" placeholder="用于私有源仓库访问"></div>
+        <div class="field">
+          <label for="sourceAuthToken">Github源仓库访问令牌（可选）</label
+          ><input
+            id="sourceAuthToken"
+            type="password"
+            placeholder="用于私有源仓库访问"
+          />
+        </div>
 
-        <div class="field"><label for="descriptionStrategy">默认仓库描述策略</label>
+        <div class="field">
+          <label for="descriptionStrategy">默认仓库描述策略</label>
           <select id="descriptionStrategy">
             <option value="prefix">I. 前缀：本仓库镜像自 {url} + 原描述</option>
             <option value="original">II. 原描述</option>
@@ -29,20 +56,59 @@
           </select>
         </div>
 
-        <div class="field"><label>默认私有</label> <input id="pref_private" type="checkbox"></div>
+        <div class="field">
+          <label for="default_owner">Gitea默认仓库 Owner</label>
+          <select id="default_owner">
+            <option value="">（默认使用 Token 所属用户）</option>
+          </select>
+          <div class="small">
+            可从 Token 所属用户及其组织中选择；留空表示使用 Token 所属用户。
+          </div>
+        </div>
+
+        <div class="field">
+          <label>默认私有</label> <input id="pref_private" type="checkbox" />
+        </div>
 
         <fieldset class="field">
           <legend>默认包含项</legend>
-          <div><label>Wiki <input id="pref_wiki" type="checkbox" checked></label></div>
-          <div><label>Issues <input id="pref_issues" type="checkbox" checked></label></div>
-          <div><label>Pull Requests <input id="pref_pull_requests" type="checkbox" checked></label></div>
-          <div><label>Releases <input id="pref_releases" type="checkbox" checked></label></div>
-          <div><label>Milestones <input id="pref_milestones" type="checkbox" checked></label></div>
-          <div><label>Labels <input id="pref_labels" type="checkbox" checked></label></div>
+          <div>
+            <label>Wiki <input id="pref_wiki" type="checkbox" checked /></label>
+          </div>
+          <div>
+            <label
+              >Issues <input id="pref_issues" type="checkbox" checked
+            /></label>
+          </div>
+          <div>
+            <label
+              >Pull Requests
+              <input id="pref_pull_requests" type="checkbox" checked
+            /></label>
+          </div>
+          <div>
+            <label
+              >Releases <input id="pref_releases" type="checkbox" checked
+            /></label>
+          </div>
+          <div>
+            <label
+              >Milestones <input id="pref_milestones" type="checkbox" checked
+            /></label>
+          </div>
+          <div>
+            <label
+              >Labels <input id="pref_labels" type="checkbox" checked
+            /></label>
+          </div>
         </fieldset>
 
-        <div class="field"><label>LFS 默认</label> <input id="pref_lfs" type="checkbox"></div>
-        <div class="field"><small>注意：LFS endpoint 需在每次镜像任务中单独指定。</small></div>
+        <div class="field">
+          <label>LFS 默认</label> <input id="pref_lfs" type="checkbox" />
+        </div>
+        <div class="field">
+          <small>注意：LFS endpoint 需在每次镜像任务中单独指定。</small>
+        </div>
 
         <div class="actions">
           <button type="submit">保存</button>
