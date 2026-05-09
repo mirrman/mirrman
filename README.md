@@ -58,6 +58,7 @@
 3. 配置你的 Gitea 实例：
    - 输入 **Gitea 实例地址**（例如：`https://gitea.example.com`）
    - 输入 **Gitea 个人访问令牌**（在 Gitea 中生成：Settings → Applications → Generate New Token）
+  　注：该令牌需要`repository`的读写权限（用于创建仓库）与`organization`的`user`可读权限（用于获取仓库所有者的名称）
    - （可选）填写 **源仓库访问令牌**（用于访问私有源仓库）
 
 4. 设置默认选项：
