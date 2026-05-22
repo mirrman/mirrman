@@ -1,38 +1,29 @@
-import { createMirrorRepo } from "../utils/createMirrorRepo.js";
-import { getSettings } from "../utils/storage.js";
+import { getSettings } from "../core/storage.js";
+import { parseRepoUrl } from "../core/repo-url.js";
+import { populateOwnerPicker } from "../shared/owner-picker.js";
 
-function parseOwnerRepoFromUrl(url) {
-  // 支持 https://host/owner/repo(.git) 和 git@host:owner/repo.git
-  const m = url.match(/[:/]([^/]+)\/([^/]+?)(?:\.git)?$/);
-  if (m) return { owner: m[1], repo: m[2] };
-  return { owner: "", repo: "" };
-}
+function sendMirrorRequest(payload) {
+  return new Promise((resolve, reject) => {
+    if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
+      reject(new Error("当前环境不支持扩展消息通信"));
+      return;
+    }
 
-async function getOriginalDescription(url) {
-  try {
-    if (url.includes("github.com")) {
-      const m = url.match(/github\.com[:/]([^/]+)\/([^/]+?)(?:\.git)?$/);
-      if (!m) return "";
-      const api = `https://api.github.com/repos/${m[1]}/${m[2]}`;
-      const r = await fetch(api);
-      if (!r.ok) return "";
-      const j = await r.json();
-      return j.description || "";
-    }
-    if (url.includes("gitlab.com")) {
-      const m = url.match(/gitlab\.com[:/]([^/]+\/[^/]+?)(?:\.git)?$/);
-      if (!m) return "";
-      const project = encodeURIComponent(m[1]);
-      const api = `https://gitlab.com/api/v4/projects/${project}`;
-      const r = await fetch(api);
-      if (!r.ok) return "";
-      const j = await r.json();
-      return j.description || "";
-    }
-    return "";
-  } catch (e) {
-    return "";
-  }
+    chrome.runtime.sendMessage({ type: "RUN_MIRROR", payload }, (response) => {
+      const error = chrome.runtime.lastError;
+      if (error) {
+        reject(new Error(error.message || String(error)));
+        return;
+      }
+
+      if (!response?.ok) {
+        reject(new Error(response?.error?.message || "镜像任务失败"));
+        return;
+      }
+
+      resolve(response.data);
+    });
+  });
 }
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -50,92 +41,33 @@ document.addEventListener("DOMContentLoaded", async () => {
   const settings = await getSettings();
   const prefs = settings.preferences || {};
   descSelect.value = prefs.descriptionStrategy || "prefix";
-  if (ownerSelect) {
-    // populate ownerSelect from saved settings (settings may include gitea info)
-    ownerSelect.innerHTML =
-      '<option value="">（使用设置或 Token 所属用户）</option>';
-    try {
-      const giteaUrl = settings.giteaUrl;
-      const giteaToken = settings.giteaToken;
-      if (giteaUrl && giteaToken) {
-        const epUser = giteaUrl.replace(/\/+$/, "") + "/api/v1/user";
-        const ru = await fetch(epUser, {
-          headers: { Authorization: `token ${giteaToken}` },
-        });
-        if (ru.ok) {
-          const user = await ru.json();
-          const login = user.login || user.username || user.name;
-          if (login) {
-            const opt = document.createElement("option");
-            opt.value = login;
-            opt.textContent = `个人：${login}`;
-            ownerSelect.appendChild(opt);
-            // fetch orgs
-            const epOrgs =
-              giteaUrl.replace(/\/+$/, "") +
-              `/api/v1/users/${encodeURIComponent(login)}/orgs`;
-            const ro = await fetch(epOrgs, {
-              headers: { Authorization: `token ${giteaToken}` },
-            });
-            if (ro.ok) {
-              const orgs = await ro.json();
-              if (Array.isArray(orgs)) {
-                for (const org of orgs) {
-                  const oname = org.login || org.username || org.name;
-                  if (!oname) continue;
-                  const opt = document.createElement("option");
-                  opt.value = oname;
-                  opt.textContent = `组织：${oname}`;
-                  ownerSelect.appendChild(opt);
-                }
-              }
-            }
-          }
-        }
-      }
-    } catch (e) {
-      // ignore
-    }
-    // set default selection from settings
-    try {
-      ownerSelect.value = settings.preferences?.default_owner || "";
-    } catch (e) {}
-  }
+  await populateOwnerPicker(ownerSelect, {
+    baseUrl: settings.giteaUrl,
+    token: settings.giteaToken,
+    defaultOwner: settings.preferences?.default_owner || "",
+  });
   privateCheckbox.checked = !!prefs.private;
   issuesCheckbox.checked = prefs.issues !== false;
   wikiCheckbox.checked = prefs.wiki !== false;
   lfsCheckbox.checked = prefs.lfs || false;
 
   confirmBtn.addEventListener("click", async () => {
-    const cloneUrl = urlInput.value.trim();
-    if (!cloneUrl) return alert("请输入源仓库URL");
+    const sourceUrl = urlInput.value.trim();
+    if (!sourceUrl) return alert("请输入源仓库URL");
     confirmBtn.disabled = true;
     confirmBtn.textContent = "处理中…";
     try {
-      const parsed = parseOwnerRepoFromUrl(cloneUrl);
-      if (!parsed.repo) throw new Error("无法解析仓库地址，请检查输入");
+      const parsed = parseRepoUrl(sourceUrl);
+      if (!parsed || !parsed.repo)
+        throw new Error("无法解析仓库地址，请检查输入");
 
-      let originalDesc = "";
-      if (descSelect.value === "original" || descSelect.value === "prefix") {
-        originalDesc = await getOriginalDescription(cloneUrl);
-      }
-
-      let description = "";
-      if (descSelect.value === "prefix") {
-        const prefix = `[本仓库镜像自 ${cloneUrl}]`;
-        description = [prefix, originalDesc].filter(Boolean).join(" — ");
-      } else if (descSelect.value === "original") {
-        description = originalDesc;
-      }
-
-      const giteaUrl = settings.giteaUrl;
-      const giteaToken = settings.giteaToken;
-      if (!giteaUrl || !giteaToken)
-        throw new Error("请先在设置页面配置 Gitea 地址与 Token");
-
-      const options = {
-        auth_token: settings.sourceAuthToken || "",
-        description,
+      const result = await sendMirrorRequest({
+        sourceUrl,
+        repoName: parsed.repo,
+        repoOwner: ownerSelect
+          ? ownerSelect.value || settings.preferences?.default_owner || ""
+          : settings.preferences?.default_owner || "",
+        descriptionStrategy: descSelect.value,
         private: privateCheckbox.checked,
         wiki: wikiCheckbox.checked,
         issues: issuesCheckbox.checked,
@@ -145,20 +77,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         labels: settings.preferences?.labels ?? true,
         lfs: lfsCheckbox.checked,
         lfs_endpoint: lfsEndpointInput.value || "",
-      };
+      });
 
-      const chosenOwner = ownerSelect
-        ? ownerSelect.value || settings.preferences?.default_owner || ""
-        : settings.preferences?.default_owner || "";
-      const res = await createMirrorRepo(
-        giteaUrl,
-        cloneUrl,
-        parsed.repo || "",
-        chosenOwner,
-        giteaToken,
-        options,
+      alert(
+        "创建成功: " +
+          (result.full_name || result.name || JSON.stringify(result)),
       );
-      alert("创建成功: " + (res.full_name || res.name || JSON.stringify(res)));
     } catch (e) {
       alert("错误: " + e.message);
     } finally {
@@ -176,7 +100,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       ) {
         chrome.runtime.openOptionsPage();
       } else {
-        // fallback: open the html directly in a new tab
         window.open("../settings/settings.html", "_blank");
       }
     });

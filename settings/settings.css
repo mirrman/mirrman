@@ -1,12 +1,50 @@
 /* Settings page specific styles */
-body{padding:16px}
-.card{max-width:720px;margin:0 auto}
-.actions{margin-top:12px}
-#status{margin-left:12px}
+body {
+    padding: 16px
+}
 
-.token-row{display:flex;gap:8px;align-items:center}
-.token-row input{flex:1;padding:8px;border:1px solid #e5e7eb;border-radius:6px}
-.token-row button{background:#ffffff;border:1px solid #e5e7eb;padding:6px 8px;border-radius:6px;cursor:pointer;font-size:18px;line-height:1;width:44px;text-align:center}
+.card {
+    max-width: 720px;
+    margin: 0 auto
+}
 
-.status-success{color:green}
-.status-error{color:red}
+.actions {
+    margin-top: 12px
+}
+
+#status {
+    margin-left: 12px
+}
+
+.token-row {
+    display: flex;
+    gap: 8px;
+    align-items: center
+}
+
+.token-row input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #e5e7eb;
+    border-radius: 6px
+}
+
+.token-row button {
+    background: #ffffff;
+    border: 1px solid #e5e7eb;
+    padding: 6px 8px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 18px;
+    line-height: 1;
+    width: 44px;
+    text-align: center
+}
+
+.status-success {
+    color: green
+}
+
+.status-error {
+    color: red
+}

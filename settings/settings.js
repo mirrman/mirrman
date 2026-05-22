@@ -1,8 +1,5 @@
-import {
-  getSettings,
-  setSettings,
-  DEFAULT_SETTINGS,
-} from "../utils/storage.js";
+import { getSettings, setSettings, DEFAULT_SETTINGS } from "../core/storage.js";
+import { populateOwnerPicker } from "../shared/owner-picker.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const form = document.getElementById("settingsForm");
@@ -80,71 +77,16 @@ document.addEventListener("DOMContentLoaded", async () => {
 
   // Test token button
   const testBtn = document.getElementById("testToken");
-  async function populateOwnersList(url, token) {
-    if (!defaultOwnerSelect) return;
-    // reset
-    defaultOwnerSelect.innerHTML =
-      '<option value="">（使用 Token 所属用户）</option>';
-    if (!url || !token) return;
-    try {
-      const epUser = url.replace(/\/+$/, "") + "/api/v1/user";
-      const ru = await fetch(epUser, {
-        headers: { Authorization: `token ${token}` },
-      });
-      if (!ru.ok) return;
-      const user = await ru.json();
-      const login = user.login || user.username || user.name;
-      if (login) {
-        const opt = document.createElement("option");
-        opt.value = login;
-        opt.textContent = `个人：${login}`;
-        defaultOwnerSelect.appendChild(opt);
-      }
+  const repopulateOwners = () =>
+    populateOwnerPicker(defaultOwnerSelect, {
+      baseUrl: giteaUrlInput.value.trim(),
+      token: giteaTokenInput.value.trim(),
+      defaultOwner: settings.preferences?.default_owner || "",
+    });
 
-      // try fetch orgs
-      if (login) {
-        const epOrgs = url.replace(/\/+$/, "") + `/api/v1/user/orgs`;
-        const ro = await fetch(epOrgs, {
-          headers: { Authorization: `token ${token}` },
-        });
-        if (ro.ok) {
-          const orgs = await ro.json();
-          if (Array.isArray(orgs)) {
-            for (const org of orgs) {
-              const oname = org.login || org.username || org.name;
-              if (!oname) continue;
-              const opt = document.createElement("option");
-              opt.value = oname;
-              opt.textContent = `组织：${oname}`;
-              defaultOwnerSelect.appendChild(opt);
-            }
-          }
-        }
-      }
-
-      // restore selected value if any
-      const saved = (await getSettings()).preferences?.default_owner || "";
-      if (saved) defaultOwnerSelect.value = saved;
-    } catch (e) {
-      // ignore errors silently
-    }
-  }
-
-  // populate owners on load if possible
-  populateOwnersList(giteaUrlInput.value.trim(), giteaTokenInput.value.trim());
-  // repopulate when URL or token changes
-  giteaUrlInput.addEventListener("change", () =>
-    populateOwnersList(
-      giteaUrlInput.value.trim(),
-      giteaTokenInput.value.trim(),
-    ),
-  );
-  giteaTokenInput.addEventListener("change", () =>
-    populateOwnersList(
-      giteaUrlInput.value.trim(),
-      giteaTokenInput.value.trim(),
-    ),
-  );
+  await repopulateOwners();
+  giteaUrlInput.addEventListener("change", repopulateOwners);
+  giteaTokenInput.addEventListener("change", repopulateOwners);
   // Token visibility toggle (use emoji)
   const toggleBtn = document.getElementById("toggleToken");
   if (toggleBtn) {

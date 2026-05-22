@@ -18,8 +18,11 @@ const DEFAULT_SETTINGS = {
 
 export function getSettings() {
   return new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.storage)
-      return resolve(DEFAULT_SETTINGS);
+    if (typeof chrome === "undefined" || !chrome.storage) {
+      resolve(DEFAULT_SETTINGS);
+      return;
+    }
+
     chrome.storage.local.get(["mirrman_settings"], (res) => {
       resolve(res.mirrman_settings || DEFAULT_SETTINGS);
     });
@@ -28,7 +31,11 @@ export function getSettings() {
 
 export function setSettings(settings) {
   return new Promise((resolve) => {
-    if (typeof chrome === "undefined" || !chrome.storage) return resolve();
+    if (typeof chrome === "undefined" || !chrome.storage) {
+      resolve();
+      return;
+    }
+
     chrome.storage.local.set({ mirrman_settings: settings }, () => resolve());
   });
 }

@@ -1,4 +1,5 @@
-html, body {
+html,
+body {
 	width: 520px;
 	min-width: 420px;
 	max-width: 640px;
@@ -7,31 +8,115 @@ html, body {
 	font-size: 14px;
 }
 
-#head{display:flex;justify-content:space-between;align-items:center}
-#head h3{margin:0;font-size:18px}
-#head .link-button, .link-button{background:none;border:0;padding:0;color:var(--m3-primary);cursor:pointer;font-size:14px}
+#head {
+	display: flex;
+	justify-content: space-between;
+	align-items: center
+}
 
-.card{padding:12px}
+#head h3 {
+	margin: 0;
+	font-size: 18px
+}
 
-#body{margin-top:8px}
+#head .link-button,
+.link-button {
+	background: none;
+	border: 0;
+	padding: 0;
+	color: var(--m3-primary);
+	cursor: pointer;
+	font-size: 14px
+}
 
-.row{display:flex;gap:8px;align-items:center}
-.row input[type=text]{flex:1;height:40px;padding:8px;border:1px solid #e5e7eb;border-radius:10px;font-size:14px}
-.row button.primary{background:var(--m3-primary);color:var(--m3-primary-contrast);border:none;padding:10px 14px;border-radius:10px;min-width:110px;height:40px;cursor:pointer}
+.card {
+	padding: 12px
+}
 
-#prefs summary{cursor:pointer;padding:8px;border-radius:8px;background:#f8fafc}
-#prefs[open] summary{background:#f1f5f9}
+#body {
+	margin-top: 8px
+}
 
-.prefs-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:8px}
-.prefs-grid .field{margin-bottom:6px}
-.field.compact{display:flex;align-items:center;gap:8px}
-.field.compact label{margin:0}
+.row {
+	display: flex;
+	gap: 8px;
+	align-items: center
+}
 
-#body.card{max-height:420px;overflow:auto}
+.row input[type=text] {
+	flex: 1;
+	height: 40px;
+	padding: 8px;
+	border: 1px solid #e5e7eb;
+	border-radius: 10px;
+	font-size: 14px
+}
 
-@media (max-width:480px){
-	html,body{width:420px}
-	.row input[type=text]{height:36px}
-	.row button.primary{height:36px;min-width:90px}
-	.prefs-grid{grid-template-columns:1fr}
+.row button.primary {
+	background: var(--m3-primary);
+	color: var(--m3-primary-contrast);
+	border: none;
+	padding: 10px 14px;
+	border-radius: 10px;
+	min-width: 110px;
+	height: 40px;
+	cursor: pointer
+}
+
+#prefs summary {
+	cursor: pointer;
+	padding: 8px;
+	border-radius: 8px;
+	background: #f8fafc
+}
+
+#prefs[open] summary {
+	background: #f1f5f9
+}
+
+.prefs-grid {
+	display: grid;
+	grid-template-columns: 1fr 1fr;
+	gap: 8px;
+	margin-top: 8px
+}
+
+.prefs-grid .field {
+	margin-bottom: 6px
+}
+
+.field.compact {
+	display: flex;
+	align-items: center;
+	gap: 8px
+}
+
+.field.compact label {
+	margin: 0
+}
+
+#body.card {
+	max-height: 420px;
+	overflow: auto
+}
+
+@media (max-width:480px) {
+
+	html,
+	body {
+		width: 420px
+	}
+
+	.row input[type=text] {
+		height: 36px
+	}
+
+	.row button.primary {
+		height: 36px;
+		min-width: 90px
+	}
+
+	.prefs-grid {
+		grid-template-columns: 1fr
+	}
 }
