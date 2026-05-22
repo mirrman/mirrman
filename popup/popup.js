@@ -37,6 +37,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const wikiCheckbox = document.getElementById("wiki");
   const lfsCheckbox = document.getElementById("lfs");
   const lfsEndpointInput = document.getElementById("lfs_endpoint");
+  const migrateOnlyCheckbox = document.getElementById("migrateOnly");
 
   const settings = await getSettings();
   const prefs = settings.preferences || {};
@@ -50,6 +51,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   issuesCheckbox.checked = prefs.issues !== false;
   wikiCheckbox.checked = prefs.wiki !== false;
   lfsCheckbox.checked = prefs.lfs || false;
+  migrateOnlyCheckbox.checked = !(prefs.mirror ?? true);
 
   confirmBtn.addEventListener("click", async () => {
     const sourceUrl = urlInput.value.trim();
@@ -77,6 +79,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         labels: settings.preferences?.labels ?? true,
         lfs: lfsCheckbox.checked,
         lfs_endpoint: lfsEndpointInput.value || "",
+        mirror: migrateOnlyCheckbox ? !migrateOnlyCheckbox.checked : true,
       });
 
       alert(

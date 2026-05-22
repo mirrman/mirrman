@@ -13,6 +13,7 @@ const DEFAULT_SETTINGS = {
     milestones: true,
     labels: true,
     lfs: false,
+    mirror: true,
   },
 };
 

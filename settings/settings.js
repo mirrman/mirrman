@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const milestonesCheckbox = document.getElementById("pref_milestones");
   const labelsCheckbox = document.getElementById("pref_labels");
   const lfsCheckbox = document.getElementById("pref_lfs");
+  const mirrorCheckbox = document.getElementById("pref_mirror");
   const status = document.getElementById("status");
 
   const settings = await getSettings();
@@ -43,6 +44,8 @@ document.addEventListener("DOMContentLoaded", async () => {
     settings.preferences?.labels ?? DEFAULT_SETTINGS.preferences.labels;
   lfsCheckbox.checked =
     settings.preferences?.lfs || DEFAULT_SETTINGS.preferences.lfs;
+  mirrorCheckbox.checked =
+    settings.preferences?.mirror ?? DEFAULT_SETTINGS.preferences.mirror;
   // set default_owner if present
   if (defaultOwnerSelect)
     defaultOwnerSelect.value = settings.preferences?.default_owner || "";
@@ -64,6 +67,7 @@ document.addEventListener("DOMContentLoaded", async () => {
         milestones: milestonesCheckbox.checked,
         labels: labelsCheckbox.checked,
         lfs: lfsCheckbox.checked,
+        mirror: mirrorCheckbox.checked,
       },
     };
     await setSettings(newSettings);

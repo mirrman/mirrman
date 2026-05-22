@@ -32,6 +32,7 @@ export async function runMirror(input, settings) {
     clone_addr: sourceUrl,
     repo_name: input?.repoName || parsed.repo,
     repo_owner: input?.repoOwner || prefs.default_owner || undefined,
+    mirror: input?.mirror ?? true,
     auth_token: settings?.sourceAuthToken || "",
     description: buildDescription(strategy, sourceUrl, originalDescription),
     private: !!input?.private,

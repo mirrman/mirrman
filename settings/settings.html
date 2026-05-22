@@ -110,6 +110,14 @@
           <small>注意：LFS endpoint 需在每次镜像任务中单独指定。</small>
         </div>
 
+        <div class="field">
+          <label>默认镜像</label>
+          <input id="pref_mirror" type="checkbox" checked />
+        </div>
+        <div class="field">
+          <small>取消表示默认仅迁移（不镜像）。</small>
+        </div>
+
         <div class="actions">
           <button type="submit">保存</button>
           <button type="button" id="testToken">测试 Gitea Token</button>
