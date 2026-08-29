@@ -97,6 +97,15 @@ When mirroring a repository, you can override your default settings:
 
 Contributions are welcome! Please feel free to submit issues or pull requests.
 
+## Architecture constraints
+
+- GitHub, GitLab, and generic Git follow one Source Platform adapter interface; each platform may optionally provide a repository-page Page Action.
+- Migration Intent owns source, destination name, owner, description strategy, and transfer preferences so pages and background commands do not translate the same fields independently.
+- Gitea is the fixed target module and owns instance authentication, owner lookup, migration requests, and migration-page prefill; there is no target adapter registry.
+- The settings module normalizes persisted data from older versions into the current schema.
+
+See [CONTEXT.md](CONTEXT.md) for domain language, [ADR-0001](docs/adr/0001-source-adapters-fixed-gitea-target.md) for the load-bearing architecture decision, and the [Source Platform adapter contract](core/source/README.md) for implementation guidance.
+
 ## License
 
 This project is licensed under the GNU General Public License v3.0 - see the [LICENSE](LICENSE) file for details.

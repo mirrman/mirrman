@@ -1,30 +1,9 @@
-import { getSettings } from "../core/storage.js";
-import { parseRepoUrl } from "../core/repo-url.js";
+import { getSettings } from "../core/settings.js";
 import { populateOwnerPicker } from "../shared/owner-picker.js";
+import "../shared/web-extension.js";
+import "../shared/extension-commands.js";
 
-function sendMirrorRequest(payload) {
-  return new Promise((resolve, reject) => {
-    if (typeof chrome === "undefined" || !chrome.runtime?.sendMessage) {
-      reject(new Error("当前环境不支持扩展消息通信"));
-      return;
-    }
-
-    chrome.runtime.sendMessage({ type: "RUN_MIRROR", payload }, (response) => {
-      const error = chrome.runtime.lastError;
-      if (error) {
-        reject(new Error(error.message || String(error)));
-        return;
-      }
-
-      if (!response?.ok) {
-        reject(new Error(response?.error?.message || "镜像任务失败"));
-        return;
-      }
-
-      resolve(response.data);
-    });
-  });
-}
+const commands = globalThis.MirrmanCommands;
 
 document.addEventListener("DOMContentLoaded", async () => {
   const urlInput = document.getElementById("url");
@@ -45,13 +24,13 @@ document.addEventListener("DOMContentLoaded", async () => {
   await populateOwnerPicker(ownerSelect, {
     baseUrl: settings.giteaUrl,
     token: settings.giteaToken,
-    defaultOwner: settings.preferences?.default_owner || "",
+    defaultOwner: settings.preferences.defaultOwner,
   });
   privateCheckbox.checked = !!prefs.private;
-  issuesCheckbox.checked = prefs.issues !== false;
-  wikiCheckbox.checked = prefs.wiki !== false;
-  lfsCheckbox.checked = prefs.lfs || false;
-  migrateOnlyCheckbox.checked = !(prefs.mirror ?? true);
+  issuesCheckbox.checked = prefs.issues;
+  wikiCheckbox.checked = prefs.wiki;
+  lfsCheckbox.checked = prefs.lfs;
+  migrateOnlyCheckbox.checked = !prefs.mirror;
 
   confirmBtn.addEventListener("click", async () => {
     const sourceUrl = urlInput.value.trim();
@@ -59,27 +38,22 @@ document.addEventListener("DOMContentLoaded", async () => {
     confirmBtn.disabled = true;
     confirmBtn.textContent = "处理中…";
     try {
-      const parsed = parseRepoUrl(sourceUrl);
-      if (!parsed || !parsed.repo)
-        throw new Error("无法解析仓库地址，请检查输入");
-
-      const result = await sendMirrorRequest({
+      const result = await commands.send("RUN_MIRROR", {
         sourceUrl,
-        repoName: parsed.repo,
-        repoOwner: ownerSelect
-          ? ownerSelect.value || settings.preferences?.default_owner || ""
-          : settings.preferences?.default_owner || "",
-        descriptionStrategy: descSelect.value,
-        private: privateCheckbox.checked,
-        wiki: wikiCheckbox.checked,
-        issues: issuesCheckbox.checked,
-        pull_requests: settings.preferences?.pull_requests ?? true,
-        releases: settings.preferences?.releases ?? true,
-        milestones: settings.preferences?.milestones ?? true,
-        labels: settings.preferences?.labels ?? true,
-        lfs: lfsCheckbox.checked,
-        lfs_endpoint: lfsEndpointInput.value || "",
-        mirror: migrateOnlyCheckbox ? !migrateOnlyCheckbox.checked : true,
+        destination: {
+          owner: ownerSelect
+            ? ownerSelect.value || settings.preferences.defaultOwner
+            : settings.preferences.defaultOwner,
+        },
+        preferences: {
+          descriptionStrategy: descSelect.value,
+          private: privateCheckbox.checked,
+          wiki: wikiCheckbox.checked,
+          issues: issuesCheckbox.checked,
+          lfs: lfsCheckbox.checked,
+          lfsEndpoint: lfsEndpointInput.value || "",
+          mirror: migrateOnlyCheckbox ? !migrateOnlyCheckbox.checked : true,
+        },
       });
 
       alert(
@@ -95,14 +69,10 @@ document.addEventListener("DOMContentLoaded", async () => {
   });
 
   if (openSettingsBtn) {
-    openSettingsBtn.addEventListener("click", () => {
-      if (
-        typeof chrome !== "undefined" &&
-        chrome.runtime &&
-        chrome.runtime.openOptionsPage
-      ) {
-        chrome.runtime.openOptionsPage();
-      } else {
+    openSettingsBtn.addEventListener("click", async () => {
+      try {
+        await commands.send("OPEN_OPTIONS_PAGE");
+      } catch {
         window.open("../settings/settings.html", "_blank");
       }
     });

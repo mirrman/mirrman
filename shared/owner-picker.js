@@ -1,4 +1,4 @@
-import { createGiteaClient } from "../core/gitea/client.js";
+import { createGiteaTarget } from "../core/gitea.js";
 
 export async function populateOwnerPicker(
   selectEl,
@@ -10,27 +10,16 @@ export async function populateOwnerPicker(
   if (!baseUrl || !token) return;
 
   try {
-    const client = createGiteaClient({ baseUrl, token });
-    const user = await client.getCurrentUser();
-    const login = user.login || user.username || user.name;
-
-    if (login) {
-      const selfOpt = document.createElement("option");
-      selfOpt.value = login;
-      selfOpt.textContent = `个人：${login}`;
-      selectEl.appendChild(selfOpt);
-
-      const orgs = await client.listUserOrgs(login);
-      if (Array.isArray(orgs)) {
-        for (const org of orgs) {
-          const oname = org.login || org.username || org.name;
-          if (!oname) continue;
-          const opt = document.createElement("option");
-          opt.value = oname;
-          opt.textContent = `组织：${oname}`;
-          selectEl.appendChild(opt);
-        }
-      }
+    const target = createGiteaTarget({ baseUrl, token });
+    const owners = await target.listRepositoryOwners();
+    for (const owner of owners) {
+      const option = document.createElement("option");
+      option.value = owner.name;
+      option.textContent =
+        owner.type === "organization"
+          ? `组织：${owner.name}`
+          : `个人：${owner.name}`;
+      selectEl.appendChild(option);
     }
   } catch (_) {
     // ignore populate errors

@@ -16,15 +16,29 @@
   "content_scripts": [
     {
       "matches": [
-        "https://github.com/*/*",
+        "https://github.com/*/*"
+      ],
+      "js": [
+        "core/source/runtime.js",
+        "core/source/github.js",
+        "shared/web-extension.js",
+        "shared/extension-commands.js",
+        "content/source-page.js"
+      ],
+      "css": [
+        "content/mirror-button.css"
+      ],
+      "run_at": "document_idle"
+    },
+    {
+      "matches": [
         "*://*/repo/migrate*",
         "*://*/*/repo/migrate*"
       ],
       "js": [
-        "content/mirror-button.js"
-      ],
-      "css": [
-        "content/mirror-button.css"
+        "shared/web-extension.js",
+        "shared/extension-commands.js",
+        "content/gitea-migrate-page.js"
       ],
       "run_at": "document_idle"
     }

@@ -1,4 +1,5 @@
-import { getSettings, setSettings, DEFAULT_SETTINGS } from "../core/storage.js";
+import { createGiteaTarget } from "../core/gitea.js";
+import { getSettings, setSettings } from "../core/settings.js";
 import { populateOwnerPicker } from "../shared/owner-picker.js";
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -24,31 +25,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   giteaUrlInput.value = settings.giteaUrl || "";
   giteaTokenInput.value = settings.giteaToken || "";
   sourceAuthInput.value = settings.sourceAuthToken || "";
-  descSelect.value =
-    settings.preferences?.descriptionStrategy ||
-    DEFAULT_SETTINGS.preferences.descriptionStrategy;
-  privateCheckbox.checked =
-    settings.preferences?.private || DEFAULT_SETTINGS.preferences.private;
-  wikiCheckbox.checked =
-    settings.preferences?.wiki ?? DEFAULT_SETTINGS.preferences.wiki;
-  issuesCheckbox.checked =
-    settings.preferences?.issues ?? DEFAULT_SETTINGS.preferences.issues;
-  pullReqCheckbox.checked =
-    settings.preferences?.pull_requests ??
-    DEFAULT_SETTINGS.preferences.pull_requests;
-  releasesCheckbox.checked =
-    settings.preferences?.releases ?? DEFAULT_SETTINGS.preferences.releases;
-  milestonesCheckbox.checked =
-    settings.preferences?.milestones ?? DEFAULT_SETTINGS.preferences.milestones;
-  labelsCheckbox.checked =
-    settings.preferences?.labels ?? DEFAULT_SETTINGS.preferences.labels;
-  lfsCheckbox.checked =
-    settings.preferences?.lfs || DEFAULT_SETTINGS.preferences.lfs;
-  mirrorCheckbox.checked =
-    settings.preferences?.mirror ?? DEFAULT_SETTINGS.preferences.mirror;
-  // set default_owner if present
-  if (defaultOwnerSelect)
-    defaultOwnerSelect.value = settings.preferences?.default_owner || "";
+  descSelect.value = settings.preferences.descriptionStrategy;
+  privateCheckbox.checked = settings.preferences.private;
+  wikiCheckbox.checked = settings.preferences.wiki;
+  issuesCheckbox.checked = settings.preferences.issues;
+  pullReqCheckbox.checked = settings.preferences.pullRequests;
+  releasesCheckbox.checked = settings.preferences.releases;
+  milestonesCheckbox.checked = settings.preferences.milestones;
+  labelsCheckbox.checked = settings.preferences.labels;
+  lfsCheckbox.checked = settings.preferences.lfs;
+  mirrorCheckbox.checked = settings.preferences.mirror;
+  if (defaultOwnerSelect) {
+    defaultOwnerSelect.value = settings.preferences.defaultOwner;
+  }
 
   form.addEventListener("submit", async (e) => {
     e.preventDefault();
@@ -59,10 +48,10 @@ document.addEventListener("DOMContentLoaded", async () => {
       preferences: {
         descriptionStrategy: descSelect.value,
         private: privateCheckbox.checked,
-        default_owner: defaultOwnerSelect ? defaultOwnerSelect.value : "",
+        defaultOwner: defaultOwnerSelect ? defaultOwnerSelect.value : "",
         wiki: wikiCheckbox.checked,
         issues: issuesCheckbox.checked,
-        pull_requests: pullReqCheckbox.checked,
+        pullRequests: pullReqCheckbox.checked,
         releases: releasesCheckbox.checked,
         milestones: milestonesCheckbox.checked,
         labels: labelsCheckbox.checked,
@@ -85,7 +74,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     populateOwnerPicker(defaultOwnerSelect, {
       baseUrl: giteaUrlInput.value.trim(),
       token: giteaTokenInput.value.trim(),
-      defaultOwner: settings.preferences?.default_owner || "",
+      defaultOwner: defaultOwnerSelect?.value || settings.preferences.defaultOwner,
     });
 
   await repopulateOwners();
@@ -126,23 +115,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     status.textContent = "测试中…";
     status.style.color = "";
     try {
-      const ep = url.replace(/\/+$/, "") + "/api/v1/user";
-      const r = await fetch(ep, {
-        headers: { Authorization: `token ${token}` },
-      });
-      if (r.ok) {
-        const j = await r.json();
-        status.textContent = `有效: ${j.login || j.username || j.full_name || j.email || "已认证"}`;
-        status.style.color = "green";
-      } else if (r.status === 401 || r.status === 403) {
-        status.textContent = "Token 无效或无权限";
-        status.style.color = "red";
-      } else {
-        status.textContent = `请求失败: ${r.status}`;
-        status.style.color = "red";
-      }
+      const user = await createGiteaTarget({ baseUrl: url, token }).verifyAccess();
+      status.textContent = `有效: ${user.login || user.username || user.full_name || user.email || "已认证"}`;
+      status.style.color = "green";
     } catch (e) {
-      status.textContent = "测试失败: " + e.message;
+      status.textContent =
+        e.status === 401 || e.status === 403
+          ? "Token 无效或无权限"
+          : "测试失败: " + e.message;
       status.style.color = "red";
     }
     setTimeout(() => {

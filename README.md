@@ -133,6 +133,15 @@
 
 欢迎提交 Issue 或 Pull Request，一起完善项目！
 
+## 架构约束
+
+- GitHub、GitLab 与 generic Git 遵循统一的 Source Platform adapter interface；每个平台可以选择是否实现仓库页面的 Page Action。
+- Migration Intent 统一承载来源、目标名称、owner、描述策略与迁移偏好，页面与后台不再各自翻译字段。
+- Gitea 是固定的 target module，集中实例认证、owner 查询、迁移请求与迁移页预填，不建立 target adapter registry。
+- settings module 会把旧版本存储数据归一化为当前 schema。
+
+领域词汇见 [CONTEXT.md](CONTEXT.md)，关键架构决定见 [ADR-0001](docs/adr/0001-source-adapters-fixed-gitea-target.md)，新增来源平台的实现约定见 [Source Platform adapter contract](core/source/README.md)。
+
 ## 许可证
 
 本项目基于 GNU General Public License v3.0 开源，详见 [LICENSE](LICENSE) 文件。

@@ -3,10 +3,24 @@ import { readFile } from "node:fs/promises";
 import test from "node:test";
 import vm from "node:vm";
 
-const source = await readFile(
-  new URL("../content/mirror-button.js", import.meta.url),
-  "utf8",
+const files = await Promise.all(
+  [
+    "../core/source/runtime.js",
+    "../core/source/github.js",
+    "../shared/web-extension.js",
+    "../shared/extension-commands.js",
+    "../content/source-page.js",
+    "../content/gitea-migrate-page.js",
+  ].map((path) => readFile(new URL(path, import.meta.url), "utf8")),
 );
+const [
+  sourceRuntime,
+  githubAdapter,
+  webExtensionCompatibility,
+  commandClient,
+  sourcePage,
+  giteaPage,
+] = files;
 
 class MockElement {
   constructor(tagName) {
@@ -14,11 +28,15 @@ class MockElement {
     this.attributes = new Map();
     this.children = [];
     this.className = "";
-    this.classList = { add: (...names) => (this.className += ` ${names.join(" ")}`) };
+    this.classList = {
+      add: (...names) => (this.className += ` ${names.join(" ")}`),
+    };
     this.dataset = {};
+    this.disabled = false;
     this.listeners = new Map();
     this.parentElement = null;
     this.textContent = "";
+    this.value = "";
   }
 
   addEventListener(type, listener) {
@@ -47,6 +65,12 @@ class MockElement {
     return clone;
   }
 
+  dispatchEvent() {}
+
+  getAttribute(name) {
+    return this.attributes.get(name) || null;
+  }
+
   querySelector() {
     return null;
   }
@@ -60,8 +84,16 @@ class MockElement {
   }
 }
 
+function runScripts(context, ...sources) {
+  for (const source of sources) vm.runInNewContext(source, context);
+}
+
 function createGithubHarness({
-  targetResponse = { ok: false, code: "SETTINGS_REQUIRED" },
+  prepareResponse = {
+    ok: true,
+    data: { url: "https://gitea.example.test/repo/migrate?mirrman=1" },
+  },
+  runtimeNamespace = "chrome",
 } = {}) {
   const messages = [];
   const alerts = [];
@@ -98,7 +130,6 @@ function createGithubHarness({
       return null;
     },
   };
-
   const location = {
     assign(url) {
       assignedUrl = url;
@@ -107,42 +138,59 @@ function createGithubHarness({
     hostname: "github.com",
     pathname: "/example/project",
   };
-
   const window = {
     addEventListener() {},
     alert: (message) => alerts.push(message),
     setTimeout: (callback) => callback(),
   };
-
-  const chrome = {
-    runtime: {
-      lastError: null,
-      sendMessage(message, callback) {
-        messages.push(message);
-        if (message.type === "GET_MIGRATE_TARGET") {
-          callback(targetResponse);
-        } else {
-          callback({ ok: true });
+  function respond(message) {
+    messages.push(message);
+    return message.type === "PREPARE_MIGRATE_PAGE"
+      ? prepareResponse
+      : { ok: true, data: null };
+  }
+  const extensionGlobals =
+    runtimeNamespace === "browser"
+      ? {
+          browser: {
+            runtime: {
+              sendMessage(message) {
+                return Promise.resolve(respond(message));
+              },
+            },
+          },
+          chrome: {},
         }
-      },
-    },
-  };
-
+      : {
+          chrome: {
+            runtime: {
+              lastError: null,
+              sendMessage(message, callback) {
+                callback(respond(message));
+              },
+            },
+          },
+        };
   class MutationObserver {
     observe() {}
   }
 
-  vm.runInNewContext(source, {
-    URL,
-    URLSearchParams,
-    chrome,
-    console,
-    document,
-    Event,
-    location,
-    MutationObserver,
-    window,
-  });
+  runScripts(
+    {
+      URL,
+      document,
+      Event,
+      ...extensionGlobals,
+      location,
+      MutationObserver,
+      window,
+    },
+    sourceRuntime,
+    githubAdapter,
+    webExtensionCompatibility,
+    commandClient,
+    sourcePage,
+  );
 
   return {
     actionList,
@@ -155,52 +203,153 @@ function createGithubHarness({
   };
 }
 
-test("the Mirror action uses the same element type and classes as Fork", () => {
+test("GitHub pageAction preserves the native action shape", () => {
   const { actionList, forkButton } = createGithubHarness();
   const mirrorButton = actionList.children[1].children[0];
 
   assert.equal(mirrorButton.tagName, forkButton.tagName);
   assert.match(mirrorButton.className, /\bbtn-sm\b/);
   assert.match(mirrorButton.className, /\bbtn\b/);
+  const mirrorIcon = mirrorButton.children[0];
+  assert.equal(mirrorIcon.attributes.get("height"), "16");
+  assert.equal(mirrorIcon.attributes.get("width"), "16");
 });
 
-test("opening settings works when openOptionsPage is unavailable", async () => {
-  const { actionList, alerts, messages } = createGithubHarness();
-  const mirrorButton = actionList.children[1].children[0];
+test("GitHub pageAction sends one migration intent and follows the prepared URL", async () => {
+  const harness = createGithubHarness();
+  const mirrorButton = harness.actionList.children[1].children[0];
 
   await mirrorButton.listeners.get("click")({ preventDefault() {} });
 
-  assert.deepEqual(alerts, []);
-  assert.deepEqual(
-    messages.map((message) => message.type),
-    ["GET_MIGRATE_TARGET", "OPEN_OPTIONS_PAGE"],
+  assert.equal(harness.assignedUrl, "https://gitea.example.test/repo/migrate?mirrman=1");
+  assert.equal(harness.messages[0].type, "PREPARE_MIGRATE_PAGE");
+  assert.equal(
+    harness.messages[0].payload.originalDescription,
+    "Description read from the GitHub page",
   );
+  assert.equal(harness.messages[0].payload.destination.name, "project");
 });
 
-test("uses the native 16px Mirror icon size", () => {
-  const { actionList } = createGithubHarness();
-  const mirrorIcon = actionList.children[1].children[0].children[0];
+test("GitHub pageAction supports promise-based browser.runtime messaging", async () => {
+  const harness = createGithubHarness({ runtimeNamespace: "browser" });
+  const mirrorButton = harness.actionList.children[1].children[0];
 
-  assert.equal(mirrorIcon.attributes.get("height"), "16");
-  assert.equal(mirrorIcon.attributes.get("width"), "16");
-  assert.equal(mirrorIcon.attributes.has("preserveAspectRatio"), false);
+  await mirrorButton.listeners.get("click")({ preventDefault() {} });
+
+  assert.deepEqual(harness.alerts, []);
+  assert.equal(
+    harness.assignedUrl,
+    "https://gitea.example.test/repo/migrate?mirrman=1",
+  );
+  assert.equal(harness.messages[0].type, "PREPARE_MIGRATE_PAGE");
 });
 
-test("carries the repository description read from the page to Gitea", async () => {
+test("GitHub pageAction opens settings when target configuration is missing", async () => {
   const harness = createGithubHarness({
-    targetResponse: {
-      ok: true,
-      giteaUrl: "https://gitea.example.test",
-      preferences: { mirror: true },
+    prepareResponse: {
+      ok: false,
+      error: { code: "SETTINGS_REQUIRED", message: "Settings required" },
     },
   });
   const mirrorButton = harness.actionList.children[1].children[0];
 
   await mirrorButton.listeners.get("click")({ preventDefault() {} });
 
-  const target = new URL(harness.assignedUrl);
-  assert.equal(
-    target.searchParams.get("mirrman_description"),
-    "Description read from the GitHub page",
+  assert.deepEqual(
+    harness.messages.map((message) => message.type),
+    ["PREPARE_MIGRATE_PAGE", "OPEN_OPTIONS_PAGE"],
   );
+  assert.deepEqual(harness.alerts, []);
+});
+
+test("fixed Gitea page module applies the command prefill", async () => {
+  const inputs = {
+    clone_addr: new MockElement("input"),
+    repo_name: new MockElement("input"),
+    auth_token: new MockElement("input"),
+    description: new MockElement("textarea"),
+  };
+  const checkboxes = Object.fromEntries(
+    [
+      "mirror",
+      "private",
+      "wiki",
+      "issues",
+      "pull_requests",
+      "releases",
+      "milestones",
+      "labels",
+      "lfs",
+    ].map((name) => [name, new MockElement("input")]),
+  );
+  const messages = [];
+  const document = {
+    documentElement: {},
+    querySelector(selector) {
+      for (const [name, input] of Object.entries(inputs)) {
+        if (selector.includes(name)) return input;
+      }
+      const checkbox = selector.match(/^input\[name="([^"]+)"\]$/);
+      if (checkbox) return checkboxes[checkbox[1]];
+      return null;
+    },
+  };
+  const chrome = {
+    runtime: {
+      lastError: null,
+      sendMessage(message, callback) {
+        messages.push(message);
+        callback({
+          ok: true,
+          data: {
+            clone_addr: "https://github.com/org/repo",
+            repo_name: "repo",
+            repo_owner: "",
+            auth_token: "source-token",
+            description: "Mirrored repository",
+            mirror: true,
+            private: true,
+            wiki: true,
+            issues: false,
+            pull_requests: true,
+            releases: true,
+            milestones: true,
+            labels: true,
+            lfs: false,
+          },
+        });
+      },
+    },
+  };
+  class MutationObserver {
+    disconnect() {}
+    observe() {}
+  }
+
+  runScripts(
+    {
+      URLSearchParams,
+      chrome,
+      document,
+      Event,
+      location: {
+        pathname: "/repo/migrate",
+        search:
+          "?mirrman=1&clone_addr=https%3A%2F%2Fgithub.com%2Forg%2Frepo&repo_name=repo",
+      },
+      MutationObserver,
+      window: { setTimeout() {} },
+    },
+    webExtensionCompatibility,
+    commandClient,
+    giteaPage,
+  );
+  await new Promise((resolve) => setImmediate(resolve));
+
+  assert.equal(messages[0].type, "GET_MIGRATE_PREFILL");
+  assert.equal(inputs.clone_addr.value, "https://github.com/org/repo");
+  assert.equal(inputs.auth_token.value, "source-token");
+  assert.equal(inputs.description.value, "Mirrored repository");
+  assert.equal(checkboxes.private.checked, true);
+  assert.equal(checkboxes.issues.checked, false);
 });

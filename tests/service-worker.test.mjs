@@ -2,8 +2,8 @@ import assert from "node:assert/strict";
 import test from "node:test";
 
 let messageListener;
-let storedSettings;
 let openedTabUrl;
+let storedSettings;
 
 global.chrome = {
   runtime: {
@@ -41,71 +41,30 @@ function sendMessage(message, sender = {}) {
   });
 }
 
-test("returns the configured Gitea target with merged preferences", async () => {
-  storedSettings = {
-    giteaUrl: "https://gitea.example.test/tools",
-    sourceAuthToken: "source-token",
-    preferences: { default_owner: "mirrors", private: true },
-  };
-
-  const response = await sendMessage({ type: "GET_MIGRATE_TARGET" });
-
-  assert.equal(response.ok, true);
-  assert.equal(response.giteaUrl, storedSettings.giteaUrl);
-  assert.equal(response.preferences.default_owner, "mirrors");
-  assert.equal(response.preferences.private, true);
-  assert.equal(response.preferences.mirror, true);
-  assert.equal(response.preferences.wiki, true);
-});
-
-test("only sends sensitive prefill data to the configured migration page", async () => {
-  storedSettings = {
-    giteaUrl: "https://gitea.example.test/tools",
-    sourceAuthToken: "source-token",
-    preferences: {
-      descriptionStrategy: "prefix",
-      default_owner: "mirrors",
-      mirror: true,
-    },
-  };
-
-  const message = {
-    type: "GET_MIGRATE_PREFILL",
+test("service worker returns one command result envelope", async () => {
+  storedSettings = {};
+  const response = await sendMessage({
+    type: "PREPARE_MIGRATE_PAGE",
     payload: {
-      sourceUrl: "https://github.com/go-gitea/gitea",
-      repoName: "gitea",
-      originalDescription: "Description read from the GitHub page",
+      sourceUrl: "https://github.com/org/repo",
+      originalDescription: "Repository",
     },
-  };
-
-  const allowed = await sendMessage(message, {
-    url: "https://gitea.example.test/tools/repo/migrate?mirrman=1",
   });
-  assert.equal(allowed.ok, true);
-  assert.equal(allowed.prefill.auth_token, "source-token");
-  assert.equal(allowed.prefill.default_owner, "mirrors");
-  assert.equal(
-    allowed.prefill.description,
-    "[本仓库镜像自 https://github.com/go-gitea/gitea] — Description read from the GitHub page",
-  );
 
-  const rejected = await sendMessage(message, {
-    url: "https://other.example.test/tools/repo/migrate?mirrman=1",
-  });
-  assert.equal(rejected.ok, false);
-  assert.match(rejected.error, /地址不匹配/);
+  assert.equal(response.ok, false);
+  assert.equal(response.error.code, "SETTINGS_REQUIRED");
+  assert.match(response.error.message, /Gitea 地址/);
 });
 
-test("opens settings through a tabs fallback when openOptionsPage is missing", async () => {
+test("opens settings through a tabs fallback", async () => {
   openedTabUrl = undefined;
-
   const response = await sendMessage({ type: "OPEN_OPTIONS_PAGE" });
 
-  assert.equal(response.ok, true);
+  assert.deepEqual(response, { ok: true, data: null });
   assert.equal(openedTabUrl, "extension://mirrman/settings/settings.html");
 });
 
-test("uses the native options API when the browser provides it", async () => {
+test("uses the native options interface when available", async () => {
   let nativeOptionsOpened = false;
   chrome.runtime.openOptionsPage = (callback) => {
     nativeOptionsOpened = true;
@@ -115,6 +74,6 @@ test("uses the native options API when the browser provides it", async () => {
   const response = await sendMessage({ type: "OPEN_OPTIONS_PAGE" });
   delete chrome.runtime.openOptionsPage;
 
-  assert.equal(response.ok, true);
+  assert.deepEqual(response, { ok: true, data: null });
   assert.equal(nativeOptionsOpened, true);
 });
