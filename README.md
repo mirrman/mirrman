@@ -9,6 +9,9 @@
 - **一键镜像仓库**
   支持将 GitHub 或任意 Git 仓库镜像到你的 Gitea 实例
 
+- **GitHub 原生风格 Mirror 按钮**
+  在 GitHub 仓库页的 Fork 与 Star 之间直接打开 Gitea 迁移页，并按 Mirrman 默认配置预填迁移表单
+
 - **灵活的配置选项**
   可自定义需要同步的内容：
   - Wiki 页面

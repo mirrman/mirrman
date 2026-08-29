@@ -1,7 +1,7 @@
 {
   "name": "Mirrman",
   "description": "An extension help you mirror a Github repo to your own Gitea instence",
-  "version": "1.2",
+  "version": "1.3",
   "manifest_version": 3,
   "permissions": [
     "storage"
@@ -13,6 +13,22 @@
     "service_worker": "background/service-worker.js",
     "type": "module"
   },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://github.com/*/*",
+        "*://*/repo/migrate*",
+        "*://*/*/repo/migrate*"
+      ],
+      "js": [
+        "content/mirror-button.js"
+      ],
+      "css": [
+        "content/mirror-button.css"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
   "action": {
     "default_popup": "popup/popup.html",
     "default_icon": "icon/icon64.png"

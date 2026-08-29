@@ -1,0 +1,13 @@
+.mirrman-mirror-action .mirrman-mirror-button {
+  padding-inline: 16px;
+}
+
+.mirrman-mirror-action .mirrman-mirror-button[aria-busy="true"] {
+  cursor: wait;
+  opacity: 0.65;
+  pointer-events: none;
+}
+
+.mirrman-mirror-action .mirrman-mirror-icon {
+  fill: currentColor;
+}

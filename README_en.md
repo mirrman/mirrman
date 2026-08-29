@@ -7,6 +7,7 @@ English | **[简体中文](README.md)**
 ## Features
 
 - **Easy Repository Mirroring** - Mirror any GitHub, GitLab, or Git repository to your Gitea instance
+- **GitHub-native Mirror Button** - Open Gitea's migration page directly between GitHub's Fork and Star actions, with the form prefilled from your Mirrman defaults
 - **Flexible Configuration** - Customize what to include in your mirrors:
   - Wiki pages
   - Issues
