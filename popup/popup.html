@@ -1,5 +1,5 @@
 <!doctype html>
-<html>
+<html lang="zh-CN">
   <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width,initial-scale=1" />
@@ -8,31 +8,36 @@
     <title>Mirrman</title>
   </head>
   <body>
-    <div id="head" class="card header">
-      <h3>Mirrman</h3>
-      <button id="openSettings" class="link-button">⚙ 设置</button>
-    </div>
+    <main class="card popup-main">
+      <header class="header">
+        <div class="brand">
+          <h1>Mirrman</h1>
+        </div>
+        <button id="openSettings" class="text-button" type="button">设置</button>
+      </header>
 
-    <div id="body" class="card" style="margin-top: 10px">
-      <div class="row">
-        <input
-          id="url"
-          type="text"
-          placeholder="例如 https://github.com/owner/repo"
-          aria-label="源仓库URL"
-        />
-        <button id="confirm" class="primary">开始镜像</button>
+      <div id="mirrorForm">
+        <div class="field source-field">
+          <label for="url">源仓库地址</label>
+          <input
+            id="url"
+            type="text"
+            placeholder="https://github.com/owner/repo"
+            aria-label="源仓库URL"
+          />
+        </div>
+        <button id="confirm" class="primary-action" type="button">开始镜像</button>
       </div>
 
       <details id="prefs">
-        <summary>下拉展开 偏好设置</summary>
+        <summary>镜像偏好设置</summary>
         <div class="prefs-grid">
           <div class="field">
             <label for="descStrategy">仓库描述</label>
             <select id="descStrategy">
-              <option value="prefix">I. [本仓库镜像自 {url}] + 原描述</option>
-              <option value="original">II. 原仓库描述</option>
-              <option value="empty">III. 留空</option>
+              <option value="prefix">添加镜像来源前缀</option>
+              <option value="original">保留原描述</option>
+              <option value="empty">留空</option>
             </select>
           </div>
           <div class="field">
@@ -41,36 +46,42 @@
               <option value="">（默认使用 Token 所属用户）</option>
             </select>
           </div>
-          <div class="field compact">
-            <label for="private">私有</label
-            ><input id="private" type="checkbox" />
+          <div class="toggle-list">
+            <label class="toggle-option" for="private">
+              <span>将仓库设为私有</span><input id="private" type="checkbox" />
+            </label>
+            <label class="toggle-option" for="migrateOnly">
+              <span>仅迁移</span><input id="migrateOnly" type="checkbox" />
+            </label>
+            <label class="toggle-option" for="lfs">
+              <span>迁移 LFS 文件</span><input id="lfs" type="checkbox" />
+            </label>
+            <label class="toggle-option" for="wiki">
+              <span>百科</span><input id="wiki" type="checkbox" checked />
+            </label>
+            <label class="toggle-option token-required-toggle" for="issues">
+              <span>工单</span><input id="issues" type="checkbox" data-token-required="true" />
+            </label>
+            <label class="toggle-option token-required-toggle" for="pullRequests">
+              <span>合并请求</span><input id="pullRequests" type="checkbox" data-token-required="true" />
+            </label>
+            <label class="toggle-option token-required-toggle" for="releases">
+              <span>版本发布</span><input id="releases" type="checkbox" data-token-required="true" />
+            </label>
+            <label class="toggle-option token-required-toggle" for="milestones">
+              <span>里程碑</span><input id="milestones" type="checkbox" data-token-required="true" />
+            </label>
+            <label class="toggle-option token-required-toggle" for="labels">
+              <span>标签</span><input id="labels" type="checkbox" data-token-required="true" />
+            </label>
           </div>
-          <div class="field compact">
-            <label for="issues">Issues</label
-            ><input id="issues" type="checkbox" checked />
-          </div>
-          <div class="field compact">
-            <label for="wiki">Wiki</label
-            ><input id="wiki" type="checkbox" checked />
-          </div>
-          <div class="field compact">
-            <label for="lfs">LFS</label><input id="lfs" type="checkbox" />
-          </div>
-          <div class="field compact">
-            <label for="migrateOnly">仅迁移（不镜像）</label
-            ><input id="migrateOnly" type="checkbox" />
-          </div>
-          <div class="field">
-            <label for="lfs_endpoint">LFS endpoint</label
-            ><input
-              id="lfs_endpoint"
-              type="text"
-              placeholder="可选：LFS endpoint"
-            />
+          <div class="field lfs-field">
+            <label for="lfs_endpoint">LFS endpoint</label>
+            <input id="lfs_endpoint" type="text" placeholder="可选" />
           </div>
         </div>
       </details>
-    </div>
+    </main>
 
     <script type="module" src="popup.js"></script>
   </body>

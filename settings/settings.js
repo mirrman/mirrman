@@ -19,6 +19,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   const lfsCheckbox = document.getElementById("pref_lfs");
   const mirrorCheckbox = document.getElementById("pref_mirror");
   const status = document.getElementById("status");
+  let statusTimeout;
+
+  const showStatus = (message, kind = "", duration = 0) => {
+    clearTimeout(statusTimeout);
+    status.textContent = message;
+    status.className = kind ? `status-${kind}` : "";
+    if (duration) {
+      statusTimeout = setTimeout(() => {
+        status.textContent = "";
+        status.className = "";
+      }, duration);
+    }
+  };
 
   const settings = await getSettings();
 
@@ -59,13 +72,12 @@ document.addEventListener("DOMContentLoaded", async () => {
         mirror: mirrorCheckbox.checked,
       },
     };
-    await setSettings(newSettings);
-    status.textContent = "已保存";
-    status.style.color = "green";
-    setTimeout(() => {
-      status.textContent = "";
-      status.style.color = "";
-    }, 2000);
+    try {
+      await setSettings(newSettings);
+      showStatus("设置已保存", "success", 2000);
+    } catch (error) {
+      showStatus(`保存失败：${error.message}`, "error");
+    }
   });
 
   // Test token button
@@ -80,22 +92,19 @@ document.addEventListener("DOMContentLoaded", async () => {
   await repopulateOwners();
   giteaUrlInput.addEventListener("change", repopulateOwners);
   giteaTokenInput.addEventListener("change", repopulateOwners);
-  // Token visibility toggle (use emoji)
   const toggleBtn = document.getElementById("toggleToken");
   if (toggleBtn) {
-    // initial icon based on current input type
-    toggleBtn.textContent = giteaTokenInput.type === "password" ? "👀" : "🙈";
-    toggleBtn.title =
-      giteaTokenInput.type === "password" ? "显示 Token" : "隐藏 Token";
     toggleBtn.addEventListener("click", () => {
       if (giteaTokenInput.type === "password") {
         giteaTokenInput.type = "text";
-        toggleBtn.textContent = "🙈";
+        toggleBtn.textContent = "隐藏";
         toggleBtn.title = "隐藏 Token";
+        toggleBtn.setAttribute("aria-label", "隐藏 Token");
       } else {
         giteaTokenInput.type = "password";
-        toggleBtn.textContent = "👀";
+        toggleBtn.textContent = "显示";
         toggleBtn.title = "显示 Token";
+        toggleBtn.setAttribute("aria-label", "显示 Token");
       }
     });
   }
@@ -104,30 +113,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     const url = giteaUrlInput.value.trim();
     const token = giteaTokenInput.value.trim();
     if (!url || !token) {
-      status.textContent = "请先填写 Gitea 地址与 Token";
-      status.style.color = "red";
-      setTimeout(() => {
-        status.textContent = "";
-        status.style.color = "";
-      }, 3000);
+      showStatus("请先填写 Gitea 地址与 Token", "error", 3000);
       return;
     }
-    status.textContent = "测试中…";
-    status.style.color = "";
+    showStatus("正在测试连接…");
     try {
       const user = await createGiteaTarget({ baseUrl: url, token }).verifyAccess();
-      status.textContent = `有效: ${user.login || user.username || user.full_name || user.email || "已认证"}`;
-      status.style.color = "green";
+      showStatus(
+        `连接成功：${user.login || user.username || user.full_name || user.email || "已认证"}`,
+        "success",
+        4000,
+      );
     } catch (e) {
-      status.textContent =
+      showStatus(
         e.status === 401 || e.status === 403
           ? "Token 无效或无权限"
-          : "测试失败: " + e.message;
-      status.style.color = "red";
+          : "测试失败：" + e.message,
+        "error",
+        4000,
+      );
     }
-    setTimeout(() => {
-      status.textContent = "";
-      status.style.color = "";
-    }, 4000);
   });
 });

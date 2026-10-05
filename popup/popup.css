@@ -1,122 +1,168 @@
 html,
 body {
-	width: 520px;
-	min-width: 420px;
-	max-width: 640px;
-	height: auto;
-	box-sizing: border-box;
-	font-size: 14px;
+  width: 440px;
+  min-width: 380px;
+  max-width: 520px;
+  margin: 0;
+  font-size: 14px;
+  background: transparent;
 }
 
-#head {
-	display: flex;
-	justify-content: space-between;
-	align-items: center
-}
-
-#head h3 {
-	margin: 0;
-	font-size: 18px
-}
-
-#head .link-button,
-.link-button {
-	background: none;
-	border: 0;
-	padding: 0;
-	color: var(--m3-primary);
-	cursor: pointer;
-	font-size: 14px
+body {
+  padding: 8px;
+  overflow: auto;
 }
 
 .card {
-	padding: 12px
+  border: 1px solid var(--m3-outline-variant);
+  border-radius: 18px;
+  background: var(--m3-surface);
+  box-shadow: 0 1px 2px rgb(16 24 40 / 6%);
 }
 
-#body {
-	margin-top: 8px
+.popup-main {
+  display: grid;
+  gap: 12px;
+  max-height: 540px;
+  padding: 12px 14px 14px;
+  overflow: visible;
 }
 
-.row {
-	display: flex;
-	gap: 8px;
-	align-items: center
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  min-height: 52px;
+  padding: 2px 2px 10px;
+  border-bottom: 1px solid var(--m3-outline-variant);
 }
 
-.row input[type=text] {
-	flex: 1;
-	height: 40px;
-	padding: 8px;
-	border: 1px solid #e5e7eb;
-	border-radius: 10px;
-	font-size: 14px
+.brand {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 }
 
-.row button.primary {
-	background: var(--m3-primary);
-	color: var(--m3-primary-contrast);
-	border: none;
-	padding: 10px 14px;
-	border-radius: 10px;
-	min-width: 110px;
-	height: 40px;
-	cursor: pointer
+h1 {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 650;
+  letter-spacing: -0.02em;
+}
+
+.text-button {
+  min-height: 36px;
+  padding: 0 14px;
+  background: var(--m3-primary-container);
+  color: var(--m3-on-primary-container);
+  border-radius: 999px;
+}
+
+.text-button:hover:not(:disabled) {
+  background: var(--m3-surface-high);
+}
+
+#mirrorForm {
+  display: grid;
+  gap: 10px;
+}
+
+#prefs {
+  margin-top: 0;
+  border-top: 1px solid var(--m3-outline-variant);
+  overflow-y: auto;
+  max-height: 280px;
 }
 
 #prefs summary {
-	cursor: pointer;
-	padding: 8px;
-	border-radius: 8px;
-	background: #f8fafc
+  position: relative;
+  padding: 12px 22px 10px 0;
+  color: var(--m3-primary);
+  font-weight: 600;
+  cursor: pointer;
+  list-style: none;
 }
 
-#prefs[open] summary {
-	background: #f1f5f9
+#prefs summary::-webkit-details-marker {
+  display: none;
+}
+
+#prefs summary::after {
+  position: absolute;
+  top: 9px;
+  right: 2px;
+  content: "+";
+  font-size: 20px;
+  line-height: 1;
+}
+
+#prefs[open] summary::after {
+  content: "−";
 }
 
 .prefs-grid {
-	display: grid;
-	grid-template-columns: 1fr 1fr;
-	gap: 8px;
-	margin-top: 8px
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0 12px;
+  padding-bottom: 2px;
 }
 
 .prefs-grid .field {
-	margin-bottom: 6px
+  margin-bottom: 16px;
 }
 
-.field.compact {
-	display: flex;
-	align-items: center;
-	gap: 8px
+.toggle-list {
+  grid-column: 1 / -1;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin: 0 0 16px;
 }
 
-.field.compact label {
-	margin: 0
+.toggle-option {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 52px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  background: var(--m3-surface-container);
+  color: var(--m3-on-surface);
+  cursor: pointer;
+  transition: background-color 120ms ease, opacity 120ms ease;
 }
 
-#body.card {
-	max-height: 420px;
-	overflow: auto
+.toggle-option:hover {
+  background: var(--m3-surface-high);
 }
 
-@media (max-width:480px) {
+.toggle-option.is-disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
 
-	html,
-	body {
-		width: 420px
-	}
+.toggle-option.is-disabled:hover {
+  background: var(--m3-surface-container);
+}
 
-	.row input[type=text] {
-		height: 36px
-	}
+.toggle-option input:disabled {
+  cursor: not-allowed;
+}
 
-	.row button.primary {
-		height: 36px;
-		min-width: 90px
-	}
+.lfs-field {
+  grid-column: 1 / -1;
+  margin-bottom: 0;
+}
 
-	.prefs-grid {
-		grid-template-columns: 1fr
-	}
+@media (max-width: 400px) {
+  html,
+  body {
+    width: 380px;
+  }
+
+  .prefs-grid,
+  .toggle-list {
+    grid-template-columns: 1fr;
+  }
 }

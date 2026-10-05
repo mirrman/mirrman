@@ -1,58 +1,205 @@
 :root {
-  --m3-surface: #ffffff;
-  --m3-on-surface: #1f2937;
-  --m3-primary: #1e88e5;
-  --m3-primary-contrast: #ffffff;
-  --m3-radius: 8px;
-  --m3-padding: 12px;
+  color-scheme: light;
+  --m3-primary: #5b5bd6;
+  --m3-primary-hover: #4949bd;
+  --m3-on-primary: #ffffff;
+  --m3-primary-container: #e5e3ff;
+  --m3-on-primary-container: #17164f;
+  --m3-surface: #f8f7ff;
+  --m3-surface-container: #f0eff7;
+  --m3-surface-high: #e9e8f1;
+  --m3-on-surface: #1b1b22;
+  --m3-on-surface-variant: #5f5e69;
+  --m3-outline: #777680;
+  --m3-outline-variant: #c8c6d2;
+  --m3-error: #b3261e;
+  --m3-success: #246b43;
+  --m3-radius: 16px;
+  --m3-radius-small: 12px;
+  --m3-focus-ring: 0 0 0 3px rgb(91 91 214 / 24%);
 }
 
 * {
-  box-sizing: border-box
+  box-sizing: border-box;
 }
 
 body {
-  font-family: Roboto, 'Segoe UI', Arial, sans-serif;
   margin: 0;
-  padding: 12px;
   background: var(--m3-surface);
   color: var(--m3-on-surface);
-}
-
-.card {
-  background: var(--m3-surface);
-  border-radius: var(--m3-radius);
-  padding: var(--m3-padding);
-  box-shadow: 0 1px 2px rgba(16, 24, 40, 0.06);
-}
-
-label {
-  display: inline-block;
-  margin-bottom: 6px;
-  font-size: 13px
-}
-
-input[type=text],
-input[type=password],
-select {
-  width: 100%;
-  padding: 8px;
-  border: 1px solid #e5e7eb;
-  border-radius: 6px;
+  font-family: Roboto, "Segoe UI", Arial, sans-serif;
   font-size: 14px;
-  background: #fff;
-  color: inherit
+  line-height: 1.5;
+}
+
+button,
+input,
+select {
+  font: inherit;
 }
 
 button {
+  min-height: 40px;
+  padding: 0 18px;
+  border: 0;
+  border-radius: 999px;
   background: var(--m3-primary);
-  color: var(--m3-primary-contrast);
-  border: none;
-  padding: 8px 12px;
-  border-radius: 6px;
-  cursor: pointer
+  color: var(--m3-on-primary);
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 120ms ease, box-shadow 120ms ease;
+}
+
+button:hover:not(:disabled) {
+  background: var(--m3-primary-hover);
+}
+
+button:focus-visible,
+input:focus-visible,
+select:focus-visible,
+summary:focus-visible {
+  outline: none;
+  box-shadow: var(--m3-focus-ring);
+}
+
+button:disabled {
+  cursor: progress;
+  opacity: 0.65;
+}
+
+.card {
+  border: 1px solid var(--m3-outline-variant);
+  border-radius: var(--m3-radius);
+  background: var(--m3-surface);
+  padding: 24px;
 }
 
 .field {
-  margin-bottom: 12px
+  min-width: 0;
+  margin: 0 0 18px;
+}
+
+.toggle-option {
+  display: flex;
+  min-height: 52px;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 8px 12px;
+  border-radius: var(--m3-radius-small);
+  background: var(--m3-surface-container);
+  color: var(--m3-on-surface);
+  cursor: pointer;
+}
+
+.toggle-option:hover {
+  background: var(--m3-surface-high);
+}
+
+.toggle-option span {
+  line-height: 1.35;
+}
+
+.field > label,
+.field > legend {
+  display: block;
+  margin-bottom: 7px;
+  color: var(--m3-on-surface-variant);
+  font-size: 13px;
+  font-weight: 600;
+}
+
+input[type="text"],
+input[type="password"],
+select {
+  width: 100%;
+  min-height: 48px;
+  padding: 0 14px;
+  border: 1px solid var(--m3-outline);
+  border-radius: var(--m3-radius-small);
+  background: var(--m3-surface);
+  color: var(--m3-on-surface);
+  transition: border-color 120ms ease, box-shadow 120ms ease;
+}
+
+input::placeholder {
+  color: var(--m3-on-surface-variant);
+  opacity: 0.8;
+}
+
+input:hover,
+select:hover {
+  border-color: var(--m3-on-surface);
+}
+
+input[type="checkbox"] {
+  position: relative;
+  flex: 0 0 40px;
+  width: 40px;
+  height: 24px;
+  margin: 0;
+  appearance: none;
+  border: 2px solid var(--m3-outline);
+  border-radius: 999px;
+  background: var(--m3-surface-high);
+  cursor: pointer;
+  transition: background-color 120ms ease, border-color 120ms ease;
+}
+
+input[type="checkbox"]::before {
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 16px;
+  height: 16px;
+  border-radius: 50%;
+  background: var(--m3-outline);
+  content: "";
+  transition: left 120ms ease, width 120ms ease, height 120ms ease,
+    top 120ms ease, background-color 120ms ease;
+}
+
+input[type="checkbox"]:checked {
+  border-color: var(--m3-primary);
+  background: var(--m3-primary);
+}
+
+input[type="checkbox"]:checked::before {
+  top: 1px;
+  left: 17px;
+  width: 18px;
+  height: 18px;
+  background: var(--m3-on-primary);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: var(--m3-focus-ring);
+}
+
+.helper-text,
+.small,
+.field small {
+  display: block;
+  margin-top: 6px;
+  color: var(--m3-on-surface-variant);
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.status-success {
+  color: var(--m3-success);
+}
+
+.status-error {
+  color: var(--m3-error);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

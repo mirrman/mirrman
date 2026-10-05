@@ -13,10 +13,28 @@ document.addEventListener("DOMContentLoaded", async () => {
   const ownerSelect = document.getElementById("ownerSelect");
   const privateCheckbox = document.getElementById("private");
   const issuesCheckbox = document.getElementById("issues");
+  const pullRequestsCheckbox = document.getElementById("pullRequests");
+  const releasesCheckbox = document.getElementById("releases");
+  const milestonesCheckbox = document.getElementById("milestones");
+  const labelsCheckbox = document.getElementById("labels");
   const wikiCheckbox = document.getElementById("wiki");
   const lfsCheckbox = document.getElementById("lfs");
   const lfsEndpointInput = document.getElementById("lfs_endpoint");
   const migrateOnlyCheckbox = document.getElementById("migrateOnly");
+  const tokenRequiredToggles = document.querySelectorAll(".token-required-toggle");
+
+  const syncTokenRequirementState = (sourceToken) => {
+    const hasSourceToken = !!sourceToken;
+    tokenRequiredToggles.forEach((toggle) => {
+      const checkbox = toggle.querySelector("input");
+      if (!checkbox) return;
+      checkbox.disabled = !hasSourceToken;
+      toggle.classList.toggle("is-disabled", !hasSourceToken);
+      if (!hasSourceToken) {
+        checkbox.checked = false;
+      }
+    });
+  };
 
   const settings = await getSettings();
   const prefs = settings.preferences || {};
@@ -27,10 +45,15 @@ document.addEventListener("DOMContentLoaded", async () => {
     defaultOwner: settings.preferences.defaultOwner,
   });
   privateCheckbox.checked = !!prefs.private;
-  issuesCheckbox.checked = prefs.issues;
   wikiCheckbox.checked = prefs.wiki;
   lfsCheckbox.checked = prefs.lfs;
   migrateOnlyCheckbox.checked = !prefs.mirror;
+  issuesCheckbox.checked = !!settings.sourceAuthToken && !!prefs.issues;
+  pullRequestsCheckbox.checked = !!settings.sourceAuthToken && !!prefs.pullRequests;
+  releasesCheckbox.checked = !!settings.sourceAuthToken && !!prefs.releases;
+  milestonesCheckbox.checked = !!settings.sourceAuthToken && !!prefs.milestones;
+  labelsCheckbox.checked = !!settings.sourceAuthToken && !!prefs.labels;
+  syncTokenRequirementState(settings.sourceAuthToken);
 
   confirmBtn.addEventListener("click", async () => {
     const sourceUrl = urlInput.value.trim();
@@ -50,6 +73,10 @@ document.addEventListener("DOMContentLoaded", async () => {
           private: privateCheckbox.checked,
           wiki: wikiCheckbox.checked,
           issues: issuesCheckbox.checked,
+          pullRequests: pullRequestsCheckbox.checked,
+          releases: releasesCheckbox.checked,
+          milestones: milestonesCheckbox.checked,
+          labels: labelsCheckbox.checked,
           lfs: lfsCheckbox.checked,
           lfsEndpoint: lfsEndpointInput.value || "",
           mirror: migrateOnlyCheckbox ? !migrateOnlyCheckbox.checked : true,
